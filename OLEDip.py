@@ -3,6 +3,7 @@
 # This calls on info from guyc at py-gaugette on github and raspi.tv.
 # GPIO docs are here...
 # https://pypi.python.org/pypi/RPi.GPIO
+# http://raspi.tv/2015/rpi-gpio-new-feature-gpio-rpi_info-replaces-gpio-rpi_revision
 
 import gaugette.ssd1306
 import time
@@ -11,7 +12,8 @@ import sys
 import socket
 import fcntl
 import struct
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+from RPi import GPIO
 
 # Collect the info for the ip address
 def get_ip_address(ifname):
@@ -42,17 +44,16 @@ except IOError:
 
 # The actual printing of TEXT
 led.clear_display()
-# intro = 'Hello!'
+
 hostname = os.uname()[1]
 host_string = 'Hostname:'+hostname
+
 rev = GPIO.RPI_INFO['P1_REVISION']
 rpi_board = 'RPi board rev:'+str(rev)
 pi_rev = GPIO.RPI_INFO['REVISION']
+pi_type = GPIO.RPI_INFO['TYPE']
 print 'RPi board revision: ',rev
-rpi_rev = 'Other rev:'+str(pi_rev)
-#self.logger.info("RPi board revision:"+str(rev)
-#				+". RPi.GPIO revision:"+str(GPIO.VERSION)+".  ")
-
+rpi_rev = 'Other:'+str(pi_rev)+' '+str(pi_type)
 ip = 'IP addr:'+TEXT
 
 print GPIO.RPI_INFO
