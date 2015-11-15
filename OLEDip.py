@@ -51,7 +51,7 @@ host_string = 'Hostname:'+hostname
 rev = GPIO.RPI_INFO['P1_REVISION']
 rpi_board = 'RPi board rev:'+str(rev)
 pi_rev = GPIO.RPI_INFO['REVISION']
-pi_type = GPIO.RPI_INFO['TYPE']
+pi_type = GPIO.RPI_INFO['TYPE']			# only works well with rpi2.
 print 'RPi board revision: ',rev
 rpi_rev = 'Other:'+str(pi_rev)+' '+str(pi_type)
 ip = 'IP addr:'+TEXT
