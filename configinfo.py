@@ -1,19 +1,20 @@
 #!/usr/bin/python
-# OLEDip.py
+# configinfo.py
+# Designed to show hw and sw configuration at power on.
 # This calls on info from guyc at py-gaugette on github and raspi.tv.
 # GPIO docs are here...
 # https://pypi.python.org/pypi/RPi.GPIO
 # http://raspi.tv/2015/rpi-gpio-new-feature-gpio-rpi_info-replaces-gpio-rpi_revision
 
-import gaugette.ssd1306
+#import gaugette.ssd1306
 import time
 import os
 import sys
 import socket
 import fcntl
 import struct
-#import RPi.GPIO as GPIO
 from RPi import GPIO
+import uoled
 
 # Collect the info for the ip address
 def get_ip_address(ifname):
@@ -27,10 +28,10 @@ def get_ip_address(ifname):
 def decode_ip_address():
 	retstr = ''
 	try:
-		retstr = get_ip_address('wlan0') # WiFi address of WiFi adapter. NOT ETHERNET
+		retstr = get_ip_address('wlan0')
 	except IOError:
 		try:
-			retstr = get_ip_address('eth0') # WiFi address of Ethernet cable. NOT ADAPTER
+			retstr = get_ip_address('eth0')
 		except IOError:
 			retstr = ('No ip connection')
 	return(retstr)
@@ -58,67 +59,63 @@ def decode_rpi_revision(rev):
 		return('Model B Revision 2.0 512MB')
 	if rev == '000f':
 		return('Model B Revision 2.0 512MB')
-	return('unknown')
+	return('RPi revision unknown:'+rev+' ')
 
 def rpi_gpio_chk_function():
+	retstr = ''
 	pin=19
 	GPIO.setmode(GPIO.BOARD)
 	func = GPIO.gpio_function(pin)
+	print func
 	if func == GPIO.SPI:
 		print 'SPI enabled'
+		retstr += 'SPI '
 	else:
 		print 'Warning: SPI not enabled!'
-	return(0)
+	pin=3
+	func = GPIO.gpio_function(pin)
+	if func == GPIO.I2C:
+		print 'I2C enabled'
+		retstr += 'I2C '
+	else:
+		print 'Warning: I2C not enabled!'
+	pin=8
+	func = GPIO.gpio_function(pin)
+	if func == GPIO.SERIAL:
+		print 'Serial enabled'
+		retstr += 'Serial '
+	else:
+		print 'Warning: Serial not enabled!'
+	pin=12
+	func = GPIO.gpio_function(pin)
+	if func == GPIO.HARD_PWM:
+		print 'PWM enabled'
+		retstr += 'PWM '
+	else:
+		print 'Warning: PWM not enabled!'
+	return(retstr)
 
-# Setup which pins we are using to control the oled
-RESET_PIN = 15
-DC_PIN    = 16
 
-oled = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN)
-oled.begin()
-oled.clear_display()
-
-ip_info = decode_ip_address()
-
-oled.clear_display()
-
-hostname = os.uname()[1]
-host_string = 'Hostname:'+hostname
-
-rev = GPIO.RPI_INFO['P1_REVISION']
-rpi_board = 'RPi board rev:'+str(rev)
-pi_rev = GPIO.RPI_INFO['REVISION']
-rpi_rev = decode_rpi_revision(pi_rev)
+MyUoled = uoled.uoled()	
+ip = 'IP addr:'+decode_ip_address()
+host_string = 'Hostname:'+os.uname()[1]
+rpi_board = 'RPi board rev:'+str(GPIO.RPI_INFO['P1_REVISION'])
+rpi_rev = decode_rpi_revision(GPIO.RPI_INFO['REVISION'])
 pi_type = GPIO.RPI_INFO['TYPE']			# only works well with rpi2.
-print 'RPi board revision: ',rev
-# rpi_rev = 'Other:'+str(pi_rev)+' '+str(pi_type)
-ip = 'IP addr:'+ip_info
 
 print GPIO.RPI_INFO
+gpio_func = rpi_gpio_chk_function()		# just prints pin function on console
+print gpio_func
 
-rpi_gpio_chk_function()		# just prints pin funtion on console
-
-oled.draw_text2(0,0,host_string,1)
-oled.draw_text2(0,8, ip, 1)
-oled.draw_text2(0,16,rpi_board,1)
-oled.draw_text2(0,24,rpi_rev,1)
-oled.display()
-
+MyUoled.writerow(1,host_string)
+MyUoled.writerow(2,ip)
+MyUoled.writerow(3,rpi_board+' '+gpio_func)
+MyUoled.writerow(4,rpi_rev)
+MyUoled.display()
 if len(rpi_rev) > 20:
-	i = 0
-	while i < len(rpi_rev)-19:
-		time.sleep(.3)
-		oled.draw_text2(i,24,'                    ',1)
-		time.sleep(.1)
-		oled.draw_text2(i,24,rpi_rev[i:20+i],1)
-		time.sleep(.2)
-		oled.display()
-		i += 1
-time.sleep(2)
-oled.draw_text2(i,24,'                    ',1)	# clear off old text
-oled.draw_text2(0,24,rpi_rev,1)
-time.sleep(.2)
-oled.display()
-
+	MyUoled.scroll_text(rpi_rev)
+MyUoled.writerow(4,rpi_rev)
+MyUoled.display()
+	
 # end
 	
