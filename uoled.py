@@ -17,16 +17,20 @@ ROW_HEIGHT = 8
 ROW_LENGTH = 20
 
 class uoled:
-	''' Class to control the micro oled based on the gaugette routines.'''
+	''' Class to control the micro oled based on the gaugette routines.
+		The row numbering starts at 1.
+		Calling writerow does not display anything. Also need to call display.
+		'''
 	def __init__(self):
 		self.MySsd = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN)
 		self.MySsd.begin()
 		self.MySsd.clear_display()
 	
-	def scroll_text(self,text):
-		''' So far just scrolls the bottom row.'''
+	def scroll_text(self,rownumber,text):
+		''' So far just scrolls one row.'''
+#		print 'Scrolling row number ',rownumber
 		x = 0
-		y = ROW_HEIGHT * 3
+		y = ROW_HEIGHT * rownumber-1
 		i = 0
 		time.sleep(1)
 		while i < len(text)-ROW_LENGTH:
