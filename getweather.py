@@ -6,14 +6,20 @@
 # https://pypi.python.org/pypi/RPi.GPIO
 # http://raspi.tv/2015/rpi-gpio-new-feature-gpio-rpi_info-replaces-gpio-rpi_revision
 
-#import gaugette.ssd1306
 import time
 import os
-import uoled
 import weather
 import constants
 
-MyUoled = uoled.uoled()	
+RPi = False
+
+if RPi == True:
+	import uoled
+	MyUoled = uoled.uoled()	
+else:
+	import uoled_emulator
+	MyUoled = uoled_emulator.dummyoled()
+	
 MyWeather = weather.Weather()
 
 print 'Fetching weather info'
