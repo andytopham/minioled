@@ -45,6 +45,20 @@ class uoled:
 		self.MySsd.draw_text2(0,(rownumber-1)*ROW_HEIGHT,string,1)
 		return(0)
 
+	def draw_blob(self,x,y):
+		self.MySsd.draw_pixel(x,y,True)
+#		self.MySsd.draw_pixel(x+1,y,True)
+#		self.MySsd.draw_pixel(x,y+1,True)
+#		self.MySsd.draw_pixel(x+1,y+1,True)
+		return(0)
+		
+	def delete_blob(self,x,y):
+		self.MySsd.draw_pixel(x,y,False)
+#		self.MySsd.draw_pixel(x+1,y,True)
+#		self.MySsd.draw_pixel(x,y+1,True)
+#		self.MySsd.draw_pixel(x+1,y+1,True)
+		return(0)
+		
 	def display(self):
 		self.MySsd.display()
 		return(0)

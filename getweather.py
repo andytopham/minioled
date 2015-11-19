@@ -18,7 +18,7 @@ if RPi == True:
 	MyUoled = uoled.uoled()	
 else:
 	import uoled_emulator
-	MyUoled = uoled_emulator.dummyoled()
+	MyUoled = uoled_emulator.Uoled_Emulator()
 	
 MyWeather = weather.Weather()
 
@@ -32,3 +32,6 @@ MyUoled.writerow(4,'Observation:'+obs)
 MyUoled.display()
 #MyUoled.scroll_text(2,'Temperature:'+temp+' C'+' Wind:'+wind+' Dirn:'+winddir+' Observation:'+obs)
 #MyUoled.display()
+MyWeather.wunder_forecast(constants.key,constants.locn)
+
+time.sleep(25)

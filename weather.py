@@ -56,6 +56,21 @@ class Weather:
 		self.logger.info("Current temperature is: %s" % (temp_c))
 		f.close()
 		return(str(temp_c),str(wind_mph),str(wind_dir),str(weathertype))
+	
+	def wunder_forecast(self,key,locn):
+		self.logger.debug("Fetching wunder forecast temperature")
+		f = urllib2.urlopen('http://api.wunderground.com/api/'+key+'/forecast/q/'+locn+'.json')
+		json_string = f.read()
+		parsed_json = json.loads(json_string)
+#		print parsed_json
+		#location = parsed_json['location']['city']
+		days = parsed_json['forecast']['txt_forecast']['forecastday']
+		print
+		for day in days:
+			print day['title'], ': ',day['fcttext_metric']
+
+		f.close()
+		return(0)
 		
 if __name__ == "__main__":
 	logging.basicConfig(filename='log/weather.log',

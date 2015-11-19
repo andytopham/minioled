@@ -14,6 +14,8 @@ apt-get -y install git
 echo '** Installing pip **'
 apt-get -y install python-pip
 echo '** Installing wirinpi2 **'
+echo '** Installing pygame **'
+apt-get -y install python-pygame
 pip install wiringpi2
 echo '** Installing gaugette **'
 git clone git://github.com/guyc/py-gaugette.git
