@@ -3,8 +3,10 @@
 
 import forecastio
 import datetime
+import forecastkey
 
-api_key = "d90d7b16e1fb6c92e59ca4a98f23c72c"
+api_key = forecastkey.key
+
 #lat = -31.967819
 #lng = 115.87718
 # Stroud
