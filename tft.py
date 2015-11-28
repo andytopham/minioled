@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # tft.py
 # My routines for writing to the 2.2" TFT.
-# This calls on info from Adafruit.
+# This calls on info from Adafruit at:
+# https://github.com/adafruit/Adafruit_Python_ILI9341
 # Fonts come from dafont.com, and are stored in a 'binary' subdirectory.
 # Need to send to rpi using binary transfer.
 
@@ -22,9 +23,8 @@ SPI_DEVICE = 0
 # Using a 5x8 font
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
-FONTSIZE = 24
 
-class Tft:
+class Screen:
 	''' Class to control the tft.
 		The row numbering starts at 1.
 		Calling writerow does not display anything. Also need to call display.
@@ -33,13 +33,18 @@ class Tft:
 		self.disp = TFT.ILI9341(DC, rst=RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=64000000))
 		self.disp.begin()
 		self.disp.clear()	# black
-		self.oldtext = ''		# used for clearing oled text
+		self.old_text = [' ' for i in range(5)]	# used for clearing oled text
 #		self.font = ImageFont.load_default()
 #		self.font = ImageFont.truetype('binary/morningtype.ttf',FONTSIZE)
 #		self.font = ImageFont.truetype('binary/secrcode.ttf',FONTSIZE)
-		self.font = ImageFont.truetype('binary/DS-DIGI.TTF',FONTSIZE)
+#		self.font = ImageFont.truetype('binary/DS-DIGI.TTF',FONTSIZE)
+		self.font = [ImageFont.load_default() for i in range(5)]
+		self.font[1] = ImageFont.truetype('binary/Hack-Regular.ttf',24)
+		self.font[2] = ImageFont.truetype('binary/Hack-Regular.ttf',60)
+		self.font[3] = ImageFont.truetype('binary/Hack-Regular.ttf',24)
+		self.font[4] = ImageFont.truetype('binary/Hack-Regular.ttf',24)
 	
-	def draw_rotated_text(self, image, text, position, angle, font, fill=(255,255,255)):
+	def _draw_rotated_text(self, image, text, position, angle, font, fill=(255,255,255)):
 		# Get rendered font width and height.
 		draw = ImageDraw.Draw(image)
 		width, height = draw.textsize(text, font=font)
@@ -69,15 +74,20 @@ class Tft:
 		return(0)
 	
 	def writerow(self, rownumber, string, clear=False):
-		xpos = 0
-		ypos = rownumber * FONTSIZE
-		rotation = 0
+		rotation = 90
+		if rotation == 0:
+			xpos = 0
+			ypos = rownumber * FONTSIZE				
+		else:
+			ypos = 0
+			xpos = rownumber * FONTSIZE
+			thisfont = self.font[rownumber]
 		if clear == True:
-			self.draw_rotated_text(self.disp.buffer, self.oldtext, (xpos, ypos), rotation, self.font, fill=(0,0,0))
-		self.draw_rotated_text(self.disp.buffer, string, (xpos, ypos), rotation, self.font, fill=(255,255,255))
-		self.oldtext = string
+			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber], (xpos, ypos), rotation, thisfont, fill=(0,0,0))
+		self._draw_rotated_text(self.disp.buffer, string, (xpos, ypos), rotation, thisfont, fill=(255,255,255))
+		self.old_text[rownumber] = string
 		return(0)
-
+		
 	def draw_blob(self,x,y):
 		self.MySsd.draw_pixel(x,y,True)
 #		self.MySsd.draw_pixel(x+1,y,True)
@@ -98,6 +108,16 @@ class Tft:
 			self.writerow(5, str(x), True)
 			self.display()
 			time.sleep(1)
+			
+	def show_time(self):
+		while True:
+			date_now = '{:<18}'.format(time.strftime("%b %d %Y ", time.gmtime()))
+			time_now = '{:<8}'.format(time.strftime("%H:%M:%S", time.gmtime()))
+			self.writerow(1, date_now, True)	
+			self.writerow(2, time_now+' ', True)	
+			self.display()
+			time.sleep(1)
+		return(0)
 	
 	def display(self):
 		self.disp.display()
@@ -105,10 +125,6 @@ class Tft:
 
 if __name__ == "__main__":
 	print 'TFT test'		
-	MyScreen = Tft()
-	MyScreen.writerow(1,'Test')
-	MyScreen.writerow(2,'Something completely different')
-	MyScreen.writerow(3,'01234567890123456789012345678901234567890')
-	MyScreen.writerow(4,'0        10        20        30        40')	
-	MyScreen.display()
-	MyScreen.write_counter()
+	MyScreen = Screen()
+	MyScreen.show_time()
+	

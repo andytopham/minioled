@@ -19,14 +19,12 @@ import tft
 LOGFILE = 'log/configinfo.log'
 	
 class Sysinfo():
-	def __init__(self):
-		uoled = False
-		if uoled == True:
-			self.MyUoled = uoled.uoled()	
+	def __init__(self, screen_type = 'uoled'):
+		if screen_type == 'uoled':
+			self.MyUoled = uoled.Screen()	
 		else:
-			self.MyUoled = tft.Tft()
-		self.collect_info()
-		
+			self.MyUoled = tft.Screen()
+		self.collect_info()		
 		
 	def get_ip_address(self, ifname):
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

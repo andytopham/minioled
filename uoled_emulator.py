@@ -12,7 +12,7 @@ WHITE = (255,255,255)
 BLACK = (0, 0, 0)
 ROWHEIGHT = 20
 
-class Uoled_Emulator():
+class Screen():
 
 	def __init__(self):
 		x = 20
