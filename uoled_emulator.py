@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # uoled_emulator.py
 
-import os
+import os, time
 import pygame
 from pygame.locals import *
 
@@ -12,7 +12,7 @@ WHITE = (255,255,255)
 BLACK = (0, 0, 0)
 ROWHEIGHT = 20
 
-class Uoled_Emulator():
+class Display():
 
 	def __init__(self):
 		x = 20
@@ -37,4 +37,14 @@ class Uoled_Emulator():
 	def display(self):
 		pygame.display.flip()
 		return(0)
+	
+	def test(self):
+		self.writerow(1,'Emulator test.')
+		self.writerow(2,'01234567890')
 		
+if __name__ == "__main__":
+	myEmulator = Display()
+	myEmulator.test()
+	myEmulator.display()
+	time.sleep(5)
+	
