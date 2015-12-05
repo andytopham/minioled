@@ -39,10 +39,12 @@ class Screen:
 #		self.font = ImageFont.truetype('binary/secrcode.ttf',FONTSIZE)
 #		self.font = ImageFont.truetype('binary/DS-DIGI.TTF',FONTSIZE)
 		self.font = [ImageFont.load_default() for i in range(5)]
-		self.font[1] = ImageFont.truetype('binary/Hack-Regular.ttf',24)
-		self.font[2] = ImageFont.truetype('binary/Hack-Regular.ttf',60)
-		self.font[3] = ImageFont.truetype('binary/Hack-Regular.ttf',24)
-		self.font[4] = ImageFont.truetype('binary/Hack-Regular.ttf',24)
+		self.fontsize = [24 for i in range(4)]
+		self.fontsize[1] = 36
+		self.font[1] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[0])
+		self.font[2] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[1])
+		self.font[3] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[2])
+		self.font[4] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[3])
 	
 	def _draw_rotated_text(self, image, text, position, angle, font, fill=(255,255,255)):
 		# Get rendered font width and height.
@@ -75,13 +77,22 @@ class Screen:
 	
 	def writerow(self, rownumber, string, clear=False):
 		rotation = 90
+		if rownumber == 2:
+			fontsize = 60
+		else:
+			fontsize = 24		
 		if rotation == 0:
 			xpos = 0
-			ypos = rownumber * FONTSIZE				
+			ypos = 0
+			for i in range (rownumber-1):
+				ypos += self.fontsize[i]
+#			ypos = rownumber * fontsize				
 		else:
 			ypos = 0
-			xpos = rownumber * FONTSIZE
-			thisfont = self.font[rownumber]
+			xpos = 0
+			for i in range (rownumber-1):
+				xpos += self.fontsize[i]
+		thisfont = self.font[rownumber]
 		if clear == True:
 			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber], (xpos, ypos), rotation, thisfont, fill=(0,0,0))
 		self._draw_rotated_text(self.disp.buffer, string, (xpos, ypos), rotation, thisfont, fill=(255,255,255))
@@ -115,6 +126,8 @@ class Screen:
 			time_now = '{:<8}'.format(time.strftime("%H:%M:%S", time.gmtime()))
 			self.writerow(1, date_now, True)	
 			self.writerow(2, time_now+' ', True)	
+			self.writerow(3, '012345678901234567890', True)	
+			self.writerow(4, 'Row 4', True)	
 			self.display()
 			time.sleep(1)
 		return(0)
