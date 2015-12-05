@@ -23,6 +23,7 @@ SPI_DEVICE = 0
 # Using a 5x8 font
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
+NO_OF_ROWS = 8
 
 class Screen:
 	''' Class to control the tft.
@@ -33,18 +34,20 @@ class Screen:
 		self.disp = TFT.ILI9341(DC, rst=RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=64000000))
 		self.disp.begin()
 		self.disp.clear()	# black
-		self.old_text = [' ' for i in range(5)]	# used for clearing oled text
+		self.old_text = [' ' for i in range(NO_OF_ROWS)]	# used for clearing oled text
 #		self.font = ImageFont.load_default()
 #		self.font = ImageFont.truetype('binary/morningtype.ttf',FONTSIZE)
 #		self.font = ImageFont.truetype('binary/secrcode.ttf',FONTSIZE)
 #		self.font = ImageFont.truetype('binary/DS-DIGI.TTF',FONTSIZE)
-		self.font = [ImageFont.load_default() for i in range(5)]
-		self.fontsize = [24 for i in range(4)]
+		self.font = [ImageFont.load_default() for i in range(NO_OF_ROWS)]
+		self.fontsize = [24 for i in range(NO_OF_ROWS)]
 		self.fontsize[1] = 36
-		self.font[1] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[0])
-		self.font[2] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[1])
-		self.font[3] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[2])
-		self.font[4] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[3])
+		for i in range(NO_OF_ROWS):
+			self.font[i] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[i])
+#		self.font[1] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[0])
+#		self.font[2] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[1])
+#		self.font[3] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[2])
+#		self.font[4] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[3])
 	
 	def _draw_rotated_text(self, image, text, position, angle, font, fill=(255,255,255)):
 		# Get rendered font width and height.
@@ -76,7 +79,7 @@ class Screen:
 		return(0)
 	
 	def writerow(self, rownumber, string, clear=False):
-		rotation = 90
+		rotation = 0
 		if rownumber == 2:
 			fontsize = 60
 		else:
@@ -92,11 +95,11 @@ class Screen:
 			xpos = 0
 			for i in range (rownumber-1):
 				xpos += self.fontsize[i]
-		thisfont = self.font[rownumber]
+		thisfont = self.font[rownumber-1]
 		if clear == True:
-			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber], (xpos, ypos), rotation, thisfont, fill=(0,0,0))
+			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber-1], (xpos, ypos), rotation, thisfont, fill=(0,0,0))
 		self._draw_rotated_text(self.disp.buffer, string, (xpos, ypos), rotation, thisfont, fill=(255,255,255))
-		self.old_text[rownumber] = string
+		self.old_text[rownumber-1] = string
 		return(0)
 		
 	def draw_blob(self,x,y):
@@ -126,8 +129,8 @@ class Screen:
 			time_now = '{:<8}'.format(time.strftime("%H:%M:%S", time.gmtime()))
 			self.writerow(1, date_now, True)	
 			self.writerow(2, time_now+' ', True)	
-			self.writerow(3, '012345678901234567890', True)	
-			self.writerow(4, 'Row 4', True)	
+			for i in range(3,NO_OF_ROWS+1):
+				self.writerow(i, 'Row '+str(i), True)	
 			self.display()
 			time.sleep(1)
 		return(0)
