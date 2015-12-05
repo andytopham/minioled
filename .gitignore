@@ -1,6 +1,8 @@
 # My ignores
 *.pyc
 *.json
+binary/*
+binary
 
 # Windows image file caches
 Thumbs.db

@@ -16,7 +16,7 @@ DC_PIN    = 16
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
 
-class uoled:
+class Screen:
 	''' Class to control the micro oled based on the gaugette routines.
 		The row numbering starts at 1.
 		Calling writerow does not display anything. Also need to call display.
