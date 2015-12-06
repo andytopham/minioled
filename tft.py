@@ -12,8 +12,9 @@ import ImageFont
 
 import time
 import Adafruit_ILI9341 as TFT
-#import Adafruit_GPIO as GPIO
+#import Adafruit_GPIO.GPIO as GPIO
 import Adafruit_GPIO.SPI as SPI
+import RPi.GPIO as GPIO
 
 # Setup which pins we are using to control the oled
 RST = 23
@@ -23,7 +24,13 @@ SPI_DEVICE = 0
 # Using a 5x8 font
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
-NO_OF_ROWS = 8
+NO_OF_ROWS = 12
+BIG_ROW = 1
+L_BUTTON = 19
+R_BUTTON = 4
+WHITE = (255,255,255)
+RED = (255,0,0)
+BLACK = (0,0,0)
 
 class Screen:
 	''' Class to control the tft.
@@ -41,15 +48,16 @@ class Screen:
 #		self.font = ImageFont.truetype('binary/DS-DIGI.TTF',FONTSIZE)
 		self.font = [ImageFont.load_default() for i in range(NO_OF_ROWS)]
 		self.fontsize = [24 for i in range(NO_OF_ROWS)]
-		self.fontsize[1] = 36
+		self.fontsize[BIG_ROW] = 36
 		for i in range(NO_OF_ROWS):
 			self.font[i] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[i])
-#		self.font[1] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[0])
-#		self.font[2] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[1])
-#		self.font[3] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[2])
-#		self.font[4] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[3])
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setup(L_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+		GPIO.setup(R_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+#		self.gpio = GPIO.RPiGPIOAdapter()
+
 	
-	def _draw_rotated_text(self, image, text, position, angle, font, fill=(255,255,255)):
+	def _draw_rotated_text(self, image, text, position, angle, font, fill=WHITE):
 		# Get rendered font width and height.
 		draw = ImageDraw.Draw(image)
 		width, height = draw.textsize(text, font=font)
@@ -80,6 +88,10 @@ class Screen:
 	
 	def writerow(self, rownumber, string, clear=False):
 		rotation = 0
+		if rownumber == 1:
+			fill_colour = RED
+		else:
+			fill_colour = WHITE
 		if rownumber == 2:
 			fontsize = 60
 		else:
@@ -97,8 +109,8 @@ class Screen:
 				xpos += self.fontsize[i]
 		thisfont = self.font[rownumber-1]
 		if clear == True:
-			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber-1], (xpos, ypos), rotation, thisfont, fill=(0,0,0))
-		self._draw_rotated_text(self.disp.buffer, string, (xpos, ypos), rotation, thisfont, fill=(255,255,255))
+			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber-1], (xpos, ypos), rotation, thisfont, fill=BLACK)
+		self._draw_rotated_text(self.disp.buffer, string, (xpos, ypos), rotation, thisfont, fill=fill_colour)
 		self.old_text[rownumber-1] = string
 		return(0)
 		
@@ -127,12 +139,26 @@ class Screen:
 		while True:
 			date_now = '{:<18}'.format(time.strftime("%b %d %Y ", time.gmtime()))
 			time_now = '{:<8}'.format(time.strftime("%H:%M:%S", time.gmtime()))
-			self.writerow(1, date_now, True)	
+			self.writerow(1, 'TFT self test running...', True)	
+			self.writerow(3, date_now, True)	
 			self.writerow(2, time_now+' ', True)	
-			for i in range(3,NO_OF_ROWS+1):
+			for i in range(4,NO_OF_ROWS-1):
 				self.writerow(i, 'Row '+str(i), True)	
 			self.display()
-			time.sleep(1)
+			time.sleep(0.5)
+			if GPIO.input(L_BUTTON):
+#				print 'Left button',
+				self.writerow(11, 'Left button true', True)
+			else:
+#				print 'no L button',
+				self.writerow(11, 'No left button', True)
+			if GPIO.input(R_BUTTON):
+#				print 'Right button'
+				self.writerow(12, 'Right button true', True)
+			else:
+#				print 'no R button'
+				self.writerow(12, 'No right button', True)
+			self.display()
 		return(0)
 	
 	def display(self):
