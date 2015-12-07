@@ -25,18 +25,16 @@ SPI_DEVICE = 0
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
 NO_OF_ROWS = 12
+ROW_LENGTH = 17
 BIG_ROW = 1
 L_BUTTON = 19
 R_BUTTON = 4
 WHITE = (255,255,255)
 RED = (255,0,0)
+YELLOW = (255,255,0)
 BLACK = (0,0,0)
 
 class Screen:
-	''' Class to control the tft.
-		The row numbering starts at 1.
-		Calling writerow does not display anything. Also need to call display.
-		'''
 	def __init__(self, rowcount=4):
 		self.disp = TFT.ILI9341(DC, rst=RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=64000000))
 		self.disp.begin()
@@ -48,15 +46,16 @@ class Screen:
 #		self.font = ImageFont.truetype('binary/DS-DIGI.TTF',FONTSIZE)
 		self.font = [ImageFont.load_default() for i in range(NO_OF_ROWS)]
 		self.fontsize = [24 for i in range(NO_OF_ROWS)]
-		self.fontsize[BIG_ROW] = 36
+#		self.fontsize[BIG_ROW] = 36
 		for i in range(NO_OF_ROWS):
 			self.font[i] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[i])
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(L_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 		GPIO.setup(R_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_UP)
-#		self.gpio = GPIO.RPiGPIOAdapter()
 
-	
+	def info(self):
+		return(NO_OF_ROWS, ROW_LENGTH)
+		
 	def _draw_rotated_text(self, image, text, position, angle, font, fill=WHITE):
 		# Get rendered font width and height.
 		draw = ImageDraw.Draw(image)
@@ -87,31 +86,32 @@ class Screen:
 		return(0)
 	
 	def writerow(self, rownumber, string, clear=False):
+		'''Now runs from row 0.'''
 		rotation = 0
-		if rownumber == 1:
-			fill_colour = RED
+		if rownumber == 0:
+			fill_colour = YELLOW
 		else:
 			fill_colour = WHITE
-		if rownumber == 2:
+		if rownumber == 12:
 			fontsize = 60
 		else:
 			fontsize = 24		
 		if rotation == 0:
 			xpos = 0
 			ypos = 0
-			for i in range (rownumber-1):
-				ypos += self.fontsize[i]
+			for i in range (rownumber):
+				ypos += self.fontsize[i-1]
 #			ypos = rownumber * fontsize				
 		else:
 			ypos = 0
 			xpos = 0
-			for i in range (rownumber-1):
-				xpos += self.fontsize[i]
-		thisfont = self.font[rownumber-1]
+			for i in range (rownumber):
+				xpos += self.fontsize[i-1]
+		thisfont = self.font[rownumber]
 		if clear == True:
-			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber-1], (xpos, ypos), rotation, thisfont, fill=BLACK)
+			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber], (xpos, ypos), rotation, thisfont, fill=BLACK)
 		self._draw_rotated_text(self.disp.buffer, string, (xpos, ypos), rotation, thisfont, fill=fill_colour)
-		self.old_text[rownumber-1] = string
+		self.old_text[rownumber] = string
 		return(0)
 		
 	def draw_blob(self,x,y):

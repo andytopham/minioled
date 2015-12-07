@@ -6,7 +6,6 @@
 # https://pypi.python.org/pypi/RPi.GPIO
 # http://raspi.tv/2015/rpi-gpio-new-feature-gpio-rpi_info-replaces-gpio-rpi_revision
 
-import RPi.GPIO as GPIO
 import time
 import os
 import sys
@@ -14,13 +13,15 @@ import socket
 import fcntl
 import struct
 #from RPi import GPIO
-print dir()
+#print dir()
+#print dir(GPIO)
+#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
+#? why is error for local variable if GPIO is the variable, but global name if tmp is name?
 
-class Configinfo:
+class Config_info():
 	'''Print various information about the system we are running.'''
 	def __init__(self):
-		''' Setup hardware and libraries.'''
-#		print sys.platform		# need to use this to select whether rpi is true
 		GPIO.setmode(GPIO.BCM)
 		print GPIO.RPI_INFO['TYPE']
 		try:
@@ -30,10 +31,14 @@ class Configinfo:
 		except:
 			self.rpi = False
 			print 'Board is NOT raspberry pi.'
-		if self.rpi == True:
-			from RPi import GPIO
+
+		board = 'tft'
+		if board == 'uoled':
 			import uoled
-			self.myUoled = uoled.uoled()	
+			self.myUoled = uoled.uoled()
+		elif board == 'tft':
+			import tft
+			self.myUoled = tft.Screen()			
 		else:
 			import uoled_emulator
 			self.myUoled = uoled_emulator.Display()
@@ -91,12 +96,25 @@ class Configinfo:
 			return('Model B Revision 2.0 512MB')
 		if rev == '000f':
 			return('Model B Revision 2.0 512MB')
+		if rev == '0010':
+			return('Model B+ Revision 1.0 512MB')
+		if rev == '0011':
+			return('Compute module Revision 1.0 512MB')
+		if rev == '0012':
+			return('Model A+ Revision 1.0 256MB')
+		if rev == '0013':
+			return('Model B+ Revision 1.2 512MB')
+		if rev == 'a01041':
+			return('Pi2 Model B Revision 1.1 1GB (Sony)')
+		if rev == 'a21041':
+			return('Pi2 Model B Revision 1.1 1GB (China)')
 		return('RPi revision unknown:'+rev+' ')
 
 	def rpi_gpio_chk_function(self):
 		retstr = ''
-		pin=19
-		GPIO.setmode(GPIO.BOARD)
+#		pin=19
+		pin=10
+#		GPIO.setmode(GPIO.BOARD)
 		func = GPIO.gpio_function(pin)
 		print func
 		if func == GPIO.SPI:
@@ -104,21 +122,24 @@ class Configinfo:
 			retstr += 'SPI '
 		else:
 			print 'Warning: SPI not enabled!'
-		pin=3
+#		pin=3
+		pin=2
 		func = GPIO.gpio_function(pin)
 		if func == GPIO.I2C:
 			print 'I2C enabled'
 			retstr += 'I2C '
 		else:
 			print 'Warning: I2C not enabled!'
-		pin=8
+#		pin=8
+		pin=14
 		func = GPIO.gpio_function(pin)
 		if func == GPIO.SERIAL:
 			print 'Serial enabled'
 			retstr += 'Serial '
 		else:
 			print 'Warning: Serial not enabled!'
-		pin=12
+#		pin=12
+		pin=18
 		func = GPIO.gpio_function(pin)
 		if func == GPIO.HARD_PWM:
 			print 'PWM enabled'
@@ -128,33 +149,36 @@ class Configinfo:
 		return(retstr)
 
 	def fetch_strings(self):
-		self.host_string = 'Hostname:' + os.uname()[1]
-		self.ip = 'IP addr:' + self.decode_ip_address()
+		no_of_rows, rowlength = self.myUoled.info()
+		retstr = [' ' for i in range(no_of_rows)]
+		retstr[0] = 'Name:' + os.uname()[1]
+		retstr[1] = 'IP:' + self.decode_ip_address()
 		if self.rpi == True:
-			self.rpi_board = 'RPi board rev:' + str(GPIO.RPI_INFO['P1_REVISION']) + ' ' + self.gpio_func
-			self.rpi_rev = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])
-			pi_type = GPIO.RPI_INFO['TYPE']			# only works well with rpi2.
+			retstr[2] = 'RPi board rev:' + str(GPIO.RPI_INFO['P1_REVISION']) 
+			retstr[3] = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])[0:rowlength]
+			retstr[4] = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])[rowlength:rowlength*2]
+			retstr[5] = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])[rowlength*2:rowlength*3]
+			retstr[6] = GPIO.RPI_INFO['TYPE']			# only works well with rpi2.
 		else:
-			self.rpi_board = 'No rpi board'
-			self.rpi_rev = 'No rpi rev'
-		return(0)
+			retstr[2] = 'No rpi board'
+			retstr[3] = 'No rpi rev'
+		retstr[7] = time.strftime("%H:%M", time.gmtime())
+		ifstring = self.rpi_gpio_chk_function()
+		retstr[8] = ('I/F: '+ifstring)[0:rowlength]
+		retstr[9] = ('I/F: '+ifstring)[rowlength:rowlength*2]
+		retstr[10] = ('I/F: '+ifstring)[rowlength*2:rowlength*3]
+		self.print_strings(retstr, no_of_rows)
+		return(retstr)
 		
-	def print_strings(self):
-#		print GPIO.RPI_INFO
-#		gpio_func = self.rpi_gpio_chk_function()		# just prints pin function on console
-#		print gpio_func
-		# now put stuff on the remote display
-		self.myUoled.writerow(1,self.host_string)
-		self.myUoled.writerow(2,self.ip)
-		self.myUoled.writerow(3,self.rpi_board)
-		self.myUoled.writerow(4,self.rpi_rev)
+	def print_strings(self, strings, no_of_rows=4):
+		for i in range(no_of_rows):
+			self.myUoled.writerow(i,strings[i])
 		self.myUoled.display()
 		return(0)
 		
 if __name__ == "__main__":
 	print 'Fetching system info'
-	myConfiginfo = Configinfo()
+	myConfiginfo = Config_info()
 	myConfiginfo.fetch_strings()
-	myConfiginfo.print_strings()
-	time.sleep(5)
+#	myConfiginfo.print_strings(strings)
 	
