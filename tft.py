@@ -22,7 +22,7 @@ DC    = 18
 SPI_PORT = 0
 SPI_DEVICE = 0
 # Using a 5x8 font
-FONT_DIR = '/home/pi/master/minioled/binary/'
+FONT_DIR = '/home/pi/fonts/'
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
 NO_OF_ROWS = 12

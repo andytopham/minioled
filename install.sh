@@ -7,7 +7,7 @@ apt-get -y install python-smbus python-spidev
 apt-get -y install python-imaging
 apt-get -y install git python-pip
 pip install RPi.GPIO
-echo '** Installing wirinpi2 **'
+echo '** Installing wiringpi2 **'
 echo '** Installing pygame **'
 apt-get -y install python-pygame
 pip install wiringpi2
@@ -24,6 +24,12 @@ echo '** Setup oled run at startup **'
 cp /home/pi/master/minioled/startoled.sh /etc/init.d
 chmod 755 /etc/init.d/startoled.sh
 update-rc.d startoled.sh defaults
+echo 'Fetching fonts'
+cd /home/pi
+mkdir fonts
+cd fonts
+curl -sL https://github.com/chrissimpkins/Hack/releases/download/v2.018/Hack-v2_018-ttf.tar.gz | tar xz
+cd /home/pi
 echo '#################'
-echo 'Now need to manually install fonts and enable SPI on RPi.'
+echo 'Now need to manually enable SPI on RPi.'
 echo '#################'
