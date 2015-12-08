@@ -12,6 +12,7 @@ import sys
 import socket
 import fcntl
 import struct
+import argparse
 #from RPi import GPIO
 #print dir()
 #print dir(GPIO)
@@ -21,21 +22,23 @@ import RPi.GPIO as GPIO
 
 class Config_info():
 	'''Print various information about the system we are running.'''
-	def __init__(self):
+	def __init__(self, board = 'tft'):
 		GPIO.setmode(GPIO.BCM)
 		try:
 			GPIO.RPI_INFO['TYPE']
 			self.rpi = True
 		except:
 			self.rpi = False
-		board = 'tft'
 		if board == 'uoled':
+			print 'Board = uoled'
 			import uoled
-			self.myUoled = uoled.uoled()
+			self.myUoled = uoled.Screen()
 		elif board == 'tft':
+			print 'Board = tft'
 			import tft
 			self.myUoled = tft.Screen()			
 		else:
+			print 'Board = emulator'
 			import uoled_emulator
 			self.myUoled = uoled_emulator.Display()
 			
@@ -127,34 +130,47 @@ class Config_info():
 
 	def fetch_strings(self):
 		no_of_rows, rowlength = self.myUoled.info()
+		print 'Display rows ',no_of_rows, ' Length ', rowlength
 		retstr = [' ' for i in range(no_of_rows)]
 		retstr[0] = 'Name:' + os.uname()[1]
 		retstr[1] = 'IP:' + self.decode_ip_address()
 		if self.rpi == True:
 			retstr[2] = 'RPi board rev:' + str(GPIO.RPI_INFO['P1_REVISION']) 
 			retstr[3] = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])[0:rowlength]
-			retstr[4] = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])[rowlength:rowlength*2]
-			retstr[5] = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])[rowlength*2:rowlength*3]
-			retstr[6] = GPIO.RPI_INFO['TYPE']			# only works well with rpi2.
+			if no_of_rows > 4:
+				retstr[4] = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])[rowlength:rowlength*2]
+				retstr[5] = self.decode_rpi_revision(GPIO.RPI_INFO['REVISION'])[rowlength*2:rowlength*3]
+				retstr[6] = GPIO.RPI_INFO['TYPE']			# only works well with rpi2.
 		else:
 			retstr[2] = 'No rpi board'
 			retstr[3] = 'No rpi rev'
 		retstr[no_of_rows-1] = time.strftime("%H:%M", time.gmtime())
 		ifstring = self.rpi_gpio_chk_function()
-		retstr[8] = ('I/F: '+ifstring)[0:rowlength]
-		retstr[9] = ('I/F: '+ifstring)[rowlength:rowlength*2]
-		retstr[10] = ('I/F: '+ifstring)[rowlength*2:rowlength*3]
+		if no_of_rows > 4:
+			retstr[8] = ('I/F: '+ifstring)[0:rowlength]
+			retstr[9] = ('I/F: '+ifstring)[rowlength:rowlength*2]
+			retstr[10] = ('I/F: '+ifstring)[rowlength*2:rowlength*3]
 		self.print_strings(retstr, no_of_rows)
 		return(retstr)
 		
 	def print_strings(self, strings, no_of_rows=4):
 		for i in range(no_of_rows):
+			print strings[i]
 			self.myUoled.writerow(i,strings[i])
 		self.myUoled.display()
 		return(0)
 		
 if __name__ == "__main__":
 	print 'Fetching system info'
-	myConfiginfo = Config_info()
+	parser = argparse.ArgumentParser(description='configinfo')
+	parser.add_argument("-H", "--HAT", help="select hat, default tft", action="store")
+	args = parser.parse_args()
+	if args.HAT:
+		hat = 'uoled'
+	else:
+		hat = 'tft'
+	# options for display are 'tft' or 'uoled'
+	print 'HAT =', hat
+	myConfiginfo = Config_info(hat)
 	myConfiginfo.fetch_strings()
 	

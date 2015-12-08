@@ -15,6 +15,8 @@ DC_PIN    = 16
 # Using a 5x8 font
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
+NO_OF_ROWS = 4
+
 
 class Screen:
 	''' Class to control the micro oled based on the gaugette routines.
@@ -42,7 +44,7 @@ class Screen:
 		return(0)
 	
 	def writerow(self,rownumber,string):
-		self.MySsd.draw_text2(0,(rownumber-1)*ROW_HEIGHT,string,1)
+		self.MySsd.draw_text2(0,(rownumber)*ROW_HEIGHT,string,1)
 		return(0)
 
 	def draw_blob(self,x,y):
@@ -62,4 +64,16 @@ class Screen:
 	def display(self):
 		self.MySsd.display()
 		return(0)
+	
+	def test(self):
+		self.writerow(1,'Test')
+		self.display()
+		return(0)
 		
+	def info(self):
+		return(NO_OF_ROWS, ROW_LENGTH)
+		
+if __name__ == "__main__":
+	print 'Uoled test'		
+	MyScreen = Screen()
+	MyScreen.test()
