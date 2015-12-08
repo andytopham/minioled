@@ -22,6 +22,7 @@ DC    = 18
 SPI_PORT = 0
 SPI_DEVICE = 0
 # Using a 5x8 font
+FONT_DIR = '/home/pi/master/minioled/binary/'
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
 NO_OF_ROWS = 12
@@ -48,7 +49,7 @@ class Screen:
 		self.fontsize = [24 for i in range(NO_OF_ROWS)]
 #		self.fontsize[BIG_ROW] = 36
 		for i in range(NO_OF_ROWS):
-			self.font[i] = ImageFont.truetype('binary/Hack-Regular.ttf',self.fontsize[i])
+			self.font[i] = ImageFont.truetype(FONT_DIR+'Hack-Regular.ttf',self.fontsize[i])
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setup(L_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 		GPIO.setup(R_BUTTON, GPIO.IN, pull_up_down = GPIO.PUD_UP)
@@ -139,25 +140,25 @@ class Screen:
 		while True:
 			date_now = '{:<18}'.format(time.strftime("%b %d %Y ", time.gmtime()))
 			time_now = '{:<8}'.format(time.strftime("%H:%M:%S", time.gmtime()))
-			self.writerow(1, 'TFT self test running...', True)	
-			self.writerow(3, date_now, True)	
-			self.writerow(2, time_now+' ', True)	
-			for i in range(4,NO_OF_ROWS-1):
+			self.writerow(0, 'TFT self test running...', True)	
+			self.writerow(1, time_now+' ', True)	
+			self.writerow(2, date_now, True)	
+			for i in range(3,NO_OF_ROWS-2):
 				self.writerow(i, 'Row '+str(i), True)	
 			self.display()
 			time.sleep(0.5)
 			if GPIO.input(L_BUTTON):
 #				print 'Left button',
-				self.writerow(11, 'Left button true', True)
+				self.writerow(NO_OF_ROWS-2, 'Left button true', True)
 			else:
 #				print 'no L button',
-				self.writerow(11, 'No left button', True)
+				self.writerow(NO_OF_ROWS-2, 'Left button false', True)
 			if GPIO.input(R_BUTTON):
 #				print 'Right button'
-				self.writerow(12, 'Right button true', True)
+				self.writerow(NO_OF_ROWS-1, 'Right button true', True)
 			else:
 #				print 'no R button'
-				self.writerow(12, 'No right button', True)
+				self.writerow(NO_OF_ROWS-1, 'Right button false', True)
 			self.display()
 		return(0)
 	

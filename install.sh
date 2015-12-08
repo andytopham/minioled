@@ -2,7 +2,8 @@
 # Installer for gaugette library to drive mini oled.
 echo '### Installing stuff for mini oled ###'
 apt-get update
-apt-get -y install build-essential python-setuptools python-dev python-smbus python-spidev
+apt-get -y install build-essential python-setuptools python-dev
+apt-get -y install python-smbus python-spidev
 apt-get -y install python-imaging
 apt-get -y install git python-pip
 pip install RPi.GPIO
@@ -23,3 +24,6 @@ echo '** Setup oled run at startup **'
 cp /home/pi/master/minioled/startoled.sh /etc/init.d
 chmod 755 /etc/init.d/startoled.sh
 update-rc.d startoled.sh defaults
+echo '#################'
+echo 'Now need to manually install fonts and enable SPI on RPi.'
+echo '#################'

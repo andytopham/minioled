@@ -23,15 +23,11 @@ class Config_info():
 	'''Print various information about the system we are running.'''
 	def __init__(self):
 		GPIO.setmode(GPIO.BCM)
-		print GPIO.RPI_INFO['TYPE']
 		try:
 			GPIO.RPI_INFO['TYPE']
 			self.rpi = True
-			print 'Board is raspberry pi.'
 		except:
 			self.rpi = False
-			print 'Board is NOT raspberry pi.'
-
 		board = 'tft'
 		if board == 'uoled':
 			import uoled
@@ -54,7 +50,6 @@ class Config_info():
 		else:
 			s.connect(("gmail.com",80))
 			name = s.getsockname()
-			print name
 			s.close()
 #			s.connect(('8.8.8.8', 80))
 #			s.getsockname()[0]
@@ -112,40 +107,22 @@ class Config_info():
 
 	def rpi_gpio_chk_function(self):
 		retstr = ''
-#		pin=19
 		pin=10
-#		GPIO.setmode(GPIO.BOARD)
 		func = GPIO.gpio_function(pin)
-		print func
 		if func == GPIO.SPI:
-			print 'SPI enabled'
 			retstr += 'SPI '
-		else:
-			print 'Warning: SPI not enabled!'
-#		pin=3
-		pin=2
+			pin=2
 		func = GPIO.gpio_function(pin)
 		if func == GPIO.I2C:
-			print 'I2C enabled'
 			retstr += 'I2C '
-		else:
-			print 'Warning: I2C not enabled!'
-#		pin=8
 		pin=14
 		func = GPIO.gpio_function(pin)
 		if func == GPIO.SERIAL:
-			print 'Serial enabled'
 			retstr += 'Serial '
-		else:
-			print 'Warning: Serial not enabled!'
-#		pin=12
 		pin=18
 		func = GPIO.gpio_function(pin)
 		if func == GPIO.HARD_PWM:
-			print 'PWM enabled'
 			retstr += 'PWM '
-		else:
-			print 'Warning: PWM not enabled!'
 		return(retstr)
 
 	def fetch_strings(self):
@@ -162,7 +139,7 @@ class Config_info():
 		else:
 			retstr[2] = 'No rpi board'
 			retstr[3] = 'No rpi rev'
-		retstr[7] = time.strftime("%H:%M", time.gmtime())
+		retstr[no_of_rows-1] = time.strftime("%H:%M", time.gmtime())
 		ifstring = self.rpi_gpio_chk_function()
 		retstr[8] = ('I/F: '+ifstring)[0:rowlength]
 		retstr[9] = ('I/F: '+ifstring)[rowlength:rowlength*2]
@@ -180,5 +157,4 @@ if __name__ == "__main__":
 	print 'Fetching system info'
 	myConfiginfo = Config_info()
 	myConfiginfo.fetch_strings()
-#	myConfiginfo.print_strings(strings)
 	
