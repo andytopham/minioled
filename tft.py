@@ -28,6 +28,7 @@ ROW_LENGTH = 20
 NO_OF_ROWS = 12
 ROW_LENGTH = 17
 BIG_ROW = 1
+# gpio pin definitions
 L_BUTTON = 19
 R_BUTTON = 4
 WHITE = (255,255,255)
@@ -36,7 +37,8 @@ YELLOW = (255,255,0)
 BLACK = (0,0,0)
 
 class Screen:
-	def __init__(self, rowcount=4):
+	def __init__(self, rowcount = NO_OF_ROWS, rotation = 0):
+		self.rotation = rotation
 		self.disp = TFT.ILI9341(DC, rst=RST, spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE, max_speed_hz=64000000))
 		self.disp.begin()
 		self.disp.clear()	# black
@@ -88,7 +90,6 @@ class Screen:
 	
 	def writerow(self, rownumber, string, clear=False):
 		'''Now runs from row 0.'''
-		rotation = 0
 		if rownumber == 0:
 			fill_colour = YELLOW
 		else:
@@ -97,7 +98,7 @@ class Screen:
 			fontsize = 60
 		else:
 			fontsize = 24		
-		if rotation == 0:
+		if self.rotation == 0:
 			xpos = 0
 			ypos = 0
 			for i in range (rownumber):
@@ -110,8 +111,8 @@ class Screen:
 				xpos += self.fontsize[i-1]
 		thisfont = self.font[rownumber]
 		if clear == True:
-			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber], (xpos, ypos), rotation, thisfont, fill=BLACK)
-		self._draw_rotated_text(self.disp.buffer, string, (xpos, ypos), rotation, thisfont, fill=fill_colour)
+			self._draw_rotated_text(self.disp.buffer, self.old_text[rownumber], (xpos, ypos), self.rotation, thisfont, fill=BLACK)
+		self._draw_rotated_text(self.disp.buffer, string, (xpos, ypos), self.rotation, thisfont, fill=fill_colour)
 		self.old_text[rownumber] = string
 		return(0)
 		

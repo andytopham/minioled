@@ -18,12 +18,18 @@ import argparse
 #print dir(GPIO)
 #import RPi.GPIO as GPIO
 import RPi.GPIO as GPIO
-#? why is error for local variable if GPIO is the variable, but global name if tmp is name?
+# gpio id pin numbers
+ID0 = 12
+ID1 = 13
+ID2 = 16
 
 class Config_info():
 	'''Print various information about the system we are running.'''
 	def __init__(self, board = 'tft'):
 		GPIO.setmode(GPIO.BCM)
+		GPIO.setup(ID0, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+		GPIO.setup(ID1, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+		GPIO.setup(ID2, GPIO.IN, pull_up_down = GPIO.PUD_UP)
 		try:
 			GPIO.RPI_INFO['TYPE']
 			self.rpi = True
@@ -41,7 +47,7 @@ class Config_info():
 			print 'Board = emulator'
 			import uoled_emulator
 			self.myUoled = uoled_emulator.Display()
-			
+	
 	def get_ip_address(self, ifname):
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		if self.rpi == True:
@@ -150,9 +156,21 @@ class Config_info():
 			retstr[8] = ('I/F: '+ifstring)[0:rowlength]
 			retstr[9] = ('I/F: '+ifstring)[rowlength:rowlength*2]
 			retstr[10] = ('I/F: '+ifstring)[rowlength*2:rowlength*3]
+			retstr[10] = 'ID: '+self.get_id()
 		self.print_strings(retstr, no_of_rows)
 		return(retstr)
 		
+	def get_id(self):
+		retval = 0
+		if GPIO.input(ID0):
+			retval += 1
+		if GPIO.input(ID1):
+			retval += 2
+		if GPIO.input(ID2):
+			retval += 4
+		print 'ID=',retval
+		return(str(retval))
+	
 	def print_strings(self, strings, no_of_rows=4):
 		for i in range(no_of_rows):
 			print strings[i]
