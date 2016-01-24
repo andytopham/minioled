@@ -180,7 +180,7 @@ class Config_info():
 		
 if __name__ == "__main__":
 	print 'Fetching system info'
-	parser = argparse.ArgumentParser(description='configinfo')
+	parser = argparse.ArgumentParser(description='configinfo. HAT options: tft uoled')
 	parser.add_argument("-H", "--HAT", help="select hat, default tft", action="store")
 	args = parser.parse_args()
 	if args.HAT:
