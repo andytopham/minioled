@@ -5,13 +5,18 @@
 # GPIO docs are here...
 # https://pypi.python.org/pypi/RPi.GPIO
 # http://raspi.tv/2015/rpi-gpio-new-feature-gpio-rpi_info-replaces-gpio-rpi_revision
+# gaugette updates: https://github.com/guyc/py-gaugette
 
+import gaugette.gpio
 import gaugette.ssd1306
 import time
 
-# Setup which pins we are using to control the oled
-RESET_PIN = 15
-DC_PIN    = 16
+# Setup which pins we are using to control the oled - these are wiring pi numbers.
+# RESET_PIN = 15
+# DC_PIN    = 16
+# Now do it properly with real raspberry pi numbers
+RESET_PIN = 14
+DC_PIN    = 15
 # Using a 5x8 font
 ROW_HEIGHT = 8
 ROW_LENGTH = 20
@@ -24,7 +29,9 @@ class Screen:
 		Calling writerow does not display anything. Also need to call display.
 		'''
 	def __init__(self):
-		self.MySsd = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN)
+		gpio = gaugette.gpio.GPIO()
+		spi = gsugette.spi.SPI(bus=0, device=0)
+		self.MySsd = gaugette.ssd1306.SSD1306(gpio, spi, reset_pin=RESET_PIN, dc_pin=DC_PIN)
 		self.MySsd.begin()
 		self.MySsd.clear_display()
 	
