@@ -35,31 +35,23 @@ class Screen:
 		self.disp.begin()
 		self.disp.clear()
 		self.disp.display()
-
-		# Create blank image for drawing.
-		# Make sure to create image with mode '1' for 1-bit color.
+		# Create blank image for drawing. Create image with mode '1' for 1-bit color.
 		width = self.disp.width
 		height = self.disp.height
 		self.image = Image.new('1', (width, height))
-
 		# Get drawing object to draw on image.
 		self.draw = ImageDraw.Draw(self.image)
-
 		# Draw a black filled box to clear the image.
 		self.draw.rectangle((0,0,width,height), outline=0, fill=0)
-
 		# Load default font.
 #		self.font = ImageFont.load_default()
-
 		# Alternatively load a TTF font.  Make sure the .ttf font file is in the same directory as the python script!
 		# Some other nice fonts to try: http://www.dafont.com/bitmap.php
 		self.font = ImageFont.truetype(PATH+'fonts/Hack-BoldItalic.ttf', 25)
-
 		# Write two lines of text.
 		x = 2
 		top = 2
 		self.draw.text((x, top), 'uoledada setup',  font=self.font, fill=255)
-
 		# Display image.
 		self.disp.image(self.image)
 		self.disp.display()
